@@ -160,6 +160,7 @@ public final class SmcHeaderObjCGenerator
         _source.print(_indent);
         _source.print("@class ");
         _source.print(context);
+        _source.print(fsmClassName);
         _source.println("State;");
         _source.print(_indent);
         _source.print("@class ");
@@ -192,6 +193,7 @@ public final class SmcHeaderObjCGenerator
         _source.print(_indent);
         _source.print("@interface ");
         _source.print(context);
+        _source.print(fsmClassName);
         _source.println("State : SMCState");
         _source.println("{");
         _source.println("}");
@@ -297,6 +299,7 @@ public final class SmcHeaderObjCGenerator
         _source.print(_indent);
         _source.print("- (" );
         _source.print(context);
+        _source.print(fsmClassName);
         _source.println("State*)state;");
 
         _source.println();
@@ -365,6 +368,7 @@ public final class SmcHeaderObjCGenerator
     {
         String context = map.getFSM().getContext();
         String mapName = map.getName();
+        String fsmClassName = map.getFSM().getFsmClassName();
         String stateName;
 
         _source.print(_indent);
@@ -408,6 +412,7 @@ public final class SmcHeaderObjCGenerator
         _source.print(mapName);
         _source.print("_Default : ");
         _source.print(context);
+        _source.print(fsmClassName);
         _source.println("State");
         _source.print(_indent);
         _source.println("{");

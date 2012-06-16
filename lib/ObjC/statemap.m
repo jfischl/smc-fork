@@ -72,22 +72,19 @@
 
 - (void)setName:(NSString*)aValue
 {
-    NSString* oldName = _name;
-    _name = [aValue retain];
-    [oldName release];
+    _name = aValue;
 }
 
 - (void)dealloc
 {
-    [_name release];
-    [super dealloc];
+    _name = nil;
 }
 @end
 
 @implementation SMCStateEntry
 + (id)stateEntryWithState:(SMCState*)state next:(SMCStateEntry*)next;
 {
-    SMCStateEntry *ret = [[[SMCStateEntry alloc] init] autorelease];
+    SMCStateEntry *ret = [[SMCStateEntry alloc] init];
     [ret setState:state];
     [ret setNext:next];
     return ret;
@@ -97,7 +94,6 @@
 {
     [self setState:nil];
     [self setNext:nil];
-    [super dealloc];
 }
 
 - (SMCState*)state;
@@ -107,9 +103,7 @@
 
 - (void)setState:(SMCState*)aValue;
 {
-    id old = _state;
-    _state = [aValue retain];
-    [old release];
+    _state = aValue;
 }
 
 - (SMCStateEntry*)next;
@@ -119,9 +113,7 @@
 
 - (void)setNext:(SMCStateEntry*)aValue;
 {
-    id old = _next;
-    _next = [aValue retain];
-    [old release];
+    _next = aValue;
 }
 @end
 
@@ -134,8 +126,7 @@
     {
         return nil;
     }
-
-    _state = [aState retain];
+    _state = aState;
 
     return self;
 }
@@ -152,27 +143,25 @@
 
 - (void)setTransition:(NSString*)aValue
 {
-    NSString* oldTransition = _transition;
-    _transition = [aValue retain];
-    [oldTransition release];
+    _transition = aValue;
 }
 
 - (void)dealloc
 {
-    [_previousState release];
-    [_state release];
+    _previousState = nil;
+    _state = nil;
     while (_stateStack != NULL) {
         SMCStateEntry *entry = _stateStack;
         _stateStack = [_stateStack next];
-        [entry release];
+        [entry setState:nil];
+        [entry setNext:nil];
     }
-    [super dealloc];
 }
 
 - (void)clearState
 {
-    [_previousState release]; _previousState = [_state retain];
-    [_state release]; _state = NULL;
+    _previousState = nil;
+    _state = nil;
 }
 
 - (SMCState*)previousState;
@@ -183,8 +172,7 @@
 - (void)setState:(SMCState*)state;
 {
     if (state != _state) {
-        [_state release];
-        _state = [state retain];
+        _state = state;
         if ([self debugFlag]) {
             TRACE( @"ENTER STATE     : %@\n\r", [_state name] );
         }
@@ -220,11 +208,11 @@
     // on the stack.
     if (_state != NULL)
     {
-        new_entry = [[SMCStateEntry stateEntryWithState:_state next:_stateStack] retain];
+        new_entry = [SMCStateEntry stateEntryWithState:_state next:_stateStack];
         _stateStack = new_entry;
     }
 
-    [_state release]; _state = [state retain];
+    _state = state;
 
     if ([self debugFlag]) {
         TRACE(@"PUSH TO STATE   : %@\n\r", [_state name]);
@@ -235,15 +223,10 @@
 // current state.
 - (void)popState
 {
-    SMCStateEntry *entry;
-
     // Popping when there was no previous push is an error.
     NSAssert(_stateStack != NULL, @"Popping empty state stack");
-
-    [_state release]; _state = [[_stateStack state] retain];
-    entry = _stateStack;
+    _state = [_stateStack state];
     _stateStack = [_stateStack next];
-    [entry release];
 
     if ([self debugFlag]) {
         TRACE(@"POP TO STATE    : %@\n\r", [_state name]);
@@ -260,7 +243,8 @@
          state_ptr = next_ptr)
     {
         next_ptr = [state_ptr next];
-        [state_ptr release];
+        [state_ptr setNext:nil];
+        [state_ptr setState:nil];
     }
     
     _stateStack = NULL;
